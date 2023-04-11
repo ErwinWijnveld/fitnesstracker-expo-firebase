@@ -2,6 +2,7 @@ import { useRouter, useSegments } from 'expo-router';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import React, { useEffect } from 'react';
 import { auth } from '../config';
+import { getUserData } from '../lib/users';
 
 const AuthContext = React.createContext(null) as any;
 
@@ -43,8 +44,12 @@ export function Provider(props: any) {
 		// onAuthStateChanged returns an unsubscriber
 		const unsubscribeAuthStateChanged = onAuthStateChanged(
 			auth,
-			(authenticatedUser) => {
-				authenticatedUser ? setAuth(authenticatedUser) : setAuth(null);
+			async (authenticatedUser) => {
+				if (authenticatedUser) {
+					setAuth(authenticatedUser);
+				} else {
+					setAuth(null);
+				}
 				setIsLoading(false);
 			}
 		);
@@ -52,8 +57,6 @@ export function Provider(props: any) {
 		// unsubscribe auth listener on unmount
 		return unsubscribeAuthStateChanged;
 	}, [user]);
-
-	console.log('user: ', user);
 
 	return (
 		<AuthContext.Provider

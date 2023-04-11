@@ -1,21 +1,13 @@
 import React from 'react';
-import { ActivityIndicator, StyleSheet } from 'react-native';
+import { ActivityIndicator } from 'react-native';
 
-import { Colors } from '../config';
+import { COLORS } from '../lib/consts';
 import { View } from './Themed';
 
 export const LoadingIndicator = () => {
 	return (
-		<View style={styles.container}>
-			<ActivityIndicator size="large" color={Colors.orange} />
+		<View className="flex-1 items-center justify-center bg-dark">
+			<ActivityIndicator size="large" color={COLORS.primary} />
 		</View>
 	);
 };
-
-const styles = StyleSheet.create({
-	container: {
-		flex: 1,
-		justifyContent: 'center',
-		alignItems: 'center',
-	},
-});
