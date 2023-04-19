@@ -1,7 +1,6 @@
-import { collection, doc, getDoc, getDocs } from "firebase/firestore";
+import { addDoc, collection, doc, getDoc, getDocs, query, where } from "firebase/firestore";
 import { db } from "../config/firebase";
-import { useAuth } from "../hooks/auth";
-import { getExercisesData } from "./exercises";
+import { findExercisesByWorkoutId, getExercisesData } from "./exercises";
 import { getUserData } from "./users";
 
 export async function getUserWorkouts(user:any) {
@@ -13,24 +12,47 @@ export async function getUserWorkouts(user:any) {
 }
 
 export async function getWorkoutsData(user:any) {
-  const exercises = await Promise.all(
-    user.workouts.map(async (workout:any) => {
-      return getWorkoutData(workout);
+  const q = query(
+    collection(db, "workouts"),
+    where("userId", "==", user?.uid)
+  );
+
+  const workoutsSnapshot = await getDocs(q);
+
+  const workouts = await Promise.all(
+    workoutsSnapshot.docs.map(async (workout:any) => {
+      return {
+        id: workout.id,
+        ...workout.data(),
+      }
     })
   );
 
-  return exercises;
+  return workouts;
+
 }
 
-export async function getWorkoutData(workout:any) {
-  const workoutRef = doc(db, 'workouts', workout.id);
-  const workoutDoc = await getDoc(workoutRef);
+export async function createWorkout(user:any) {
+  try {
+    const docRef = await addDoc(collection(db, "workouts"), {
+      userId: user?.uid,
+      date: new Date(),
+      description: "",
+    });
+    console.log("Document written with ID: ", docRef.id);
+  } catch (e) {
+    console.error("Error adding document: ", e);
+  }
+}
 
-  const exercises = await getExercisesData(workoutDoc)
+
+export function findWorkoutData(workouts:any, exercises:any, exerciseTypes:any, workoutId:any) {
+  const workout = workouts?.find((workout:any) => workout.id === workoutId) || null;
+
+  const workoutExercises = findExercisesByWorkoutId(exercises, exerciseTypes, workoutId);
 
   return {
-    id: workoutDoc.id,
-    ...workoutDoc.data(),
-    exercises,
+    ...workout,
+    exercises: workoutExercises,
   };
 }

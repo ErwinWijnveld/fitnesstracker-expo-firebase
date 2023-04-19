@@ -1,6 +1,7 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
 import { COLORS } from '../../lib/consts';
+
 const TabLayout = () => {
 	return (
 		<Tabs
@@ -18,7 +19,7 @@ const TabLayout = () => {
 				name="index"
 				options={{
 					tabBarLabel: 'Home',
-					tabBarIcon: ({ color, size }) => (
+					tabBarIcon: ({ color, size }: any) => (
 						<MaterialCommunityIcons
 							name="home"
 							color={color}
@@ -31,7 +32,7 @@ const TabLayout = () => {
 				name="workouts"
 				options={{
 					tabBarLabel: 'Workouts',
-					tabBarIcon: ({ color, size }) => (
+					tabBarIcon: ({ color, size }: any) => (
 						<MaterialCommunityIcons
 							name="dumbbell"
 							color={color}
@@ -40,7 +41,14 @@ const TabLayout = () => {
 					),
 				}}
 			/>
+			<Tabs.Screen
+				name="workout/[workoutId]"
+				options={{
+					href: null,
+				}}
+			/>
 		</Tabs>
 	);
 };
+
 export default TabLayout;

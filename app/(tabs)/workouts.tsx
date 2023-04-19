@@ -1,43 +1,50 @@
-import { collection, doc, getDoc, getDocs } from 'firebase/firestore';
-import { useEffect, useState } from 'react';
-import { ActivityIndicator, Text, View } from 'react-native';
-import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
+import { useLayoutEffect } from 'react';
+import { ScrollView } from 'react-native';
 import { LoadingIndicator } from '../../components';
 import Container from '../../components/Container';
+import GradientButton from '../../components/buttons/GradientButton';
 import WorkoutItem from '../../components/workouts/WorkoutItem';
-import { db } from '../../config/firebase';
 import { useAuth } from '../../hooks/auth';
-import DataProvider, { useData } from '../../hooks/useData';
-import { getUserWorkouts } from '../../lib/workouts';
+import { useData } from '../../hooks/useData';
+import { createWorkout } from '../../lib/workouts';
 
 const TabWorkoutsScreen = () => {
-	return (
-		<DataProvider>
-			<Main />
-		</DataProvider>
-	);
-};
-
-const Main = () => {
 	const { user } = useAuth();
-	const { loading, data, fetchData } = useData();
+	const { setLoading, loading, workouts, fetchWorkouts } = useData();
 
-	useEffect(() => {
-		fetchData({
-			fetchFunction: () => getUserWorkouts(user),
-		});
+	useLayoutEffect(() => {
+		!workouts && fetchWorkouts();
 	}, []);
+
+	const handleCreateWorkout = async () => {
+		setLoading(true);
+		createWorkout(user)
+			.then(() => {
+				fetchWorkouts();
+			})
+			.finally(() => {
+				setLoading(false);
+			});
+	};
 
 	if (loading) {
 		return <LoadingIndicator />;
 	}
 
 	return (
-		<Container>
-			{data?.map((workout: any, i: number) => (
-				<WorkoutItem {...workout} key={i} />
-			))}
-		</Container>
+		<ScrollView className="bg-dark">
+			<Container>
+				<GradientButton
+					onPress={() => handleCreateWorkout()}
+					className="mb-4"
+				>
+					Start New Workout
+				</GradientButton>
+				{workouts?.map((workout: any, i: number) => (
+					<WorkoutItem {...workout} key={i} />
+				))}
+			</Container>
+		</ScrollView>
 	);
 };
 export default TabWorkoutsScreen;

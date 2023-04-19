@@ -1,6 +1,7 @@
-import { Slot } from 'expo-router';
+import { Slot, Stack } from 'expo-router';
 import { Provider } from '../hooks/auth';
 import useCachedResources from '../hooks/useCachedResources';
+import DataProvider from '../hooks/useData';
 
 export const unstable_settings = {
 	// Ensure any route can link back to `/`
@@ -12,12 +13,27 @@ const Root = () => {
 
 	if (!isLoadingComplete) {
 		return null;
-	} else {
-		return (
-			<Provider>
-				<Slot />
-			</Provider>
-		);
 	}
+
+	return (
+		<Provider>
+			<DataProvider>
+				<Main />
+			</DataProvider>
+		</Provider>
+	);
+};
+
+const Main = () => {
+	return (
+		<Stack
+			screenOptions={{
+				headerShown: false,
+			}}
+		>
+			<Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+			<Stack.Screen name="modal" options={{ presentation: 'modal' }} />
+		</Stack>
+	);
 };
 export default Root;

@@ -1,32 +1,81 @@
 import { createContext, useContext, useState } from 'react';
-import { getWorkoutData } from '../lib/workouts';
+import { getUserExerciseTypes } from '../lib/exerciseTypes';
+import { getUserExercises } from '../lib/exercises';
+import { getUserWorkouts } from '../lib/workouts';
+import { useAuth } from './auth';
 
 const DataContext = createContext<any>(undefined);
 
 const DataProvider = ({ children, ...rest }: any) => {
-	const [data, setData] = useState(null);
+	const { user } = useAuth();
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState(null);
 
-	const fetchData = async ({ fetchFunction }: any) => {
+	const [workouts, setWorkouts] = useState(null);
+	const [exercises, setExercises] = useState(null);
+	const [exerciseTypes, setExerciseTypes] = useState(null);
+
+	// workouts
+	async function fetchWorkouts() {
 		setLoading(true);
 
-		// replace with dynamic function
-		fetchFunction()
+		getUserWorkouts(user)
 			.then((response: any) => {
-				setData(response);
-				setLoading(false);
+				setWorkouts(response);
 			})
 			.catch((error: any) => {
 				setError(error);
+			})
+			.finally(() => {
 				setLoading(false);
 			});
-	};
+	}
+
+	// exercises
+	async function fetchExercises() {
+		setLoading(true);
+
+		getUserExercises(user)
+			.then((response: any) => {
+				setExercises(response);
+			})
+			.catch((error: any) => {
+				setError(error);
+			})
+			.finally(() => {
+				setLoading(false);
+			});
+	}
+
+	// exercise types
+	async function fetchExerciseTypes() {
+		setLoading(true);
+		getUserExerciseTypes(user)
+			.then((response: any) => {
+				setExerciseTypes(response);
+			})
+			.catch((error: any) => {
+				setError(error);
+			})
+			.finally(() => {
+				setLoading(false);
+			});
+	}
 
 	return (
 		<DataContext.Provider
 			{...rest}
-			value={{ data, loading, error, fetchData }}
+			value={{
+				loading,
+				setLoading,
+				error,
+				workouts,
+				fetchWorkouts,
+				exercises,
+				fetchExercises,
+				exerciseTypes,
+				fetchExerciseTypes,
+			}}
 		>
 			{children}
 		</DataContext.Provider>
@@ -42,10 +91,15 @@ export const useData = () => {
 	}
 
 	return {
-		data: context.data,
 		loading: context.loading,
+		setLoading: context.setLoading,
 		error: context.error,
-		fetchData: context.fetchData,
+		workouts: context.workouts,
+		fetchWorkouts: context.fetchWorkouts,
+		exercises: context.exercises,
+		fetchExercises: context.fetchExercises,
+		exerciseTypes: context.exerciseTypes,
+		fetchExerciseTypes: context.fetchExerciseTypes,
 	};
 };
 
